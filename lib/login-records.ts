@@ -19,27 +19,45 @@ export interface LoginRecord {
  */
 export async function saveLoginRecord(record: LoginRecord): Promise<void> {
   try {
+    console.log('saveLoginRecord函数开始执行，接收到的记录:', record)
+    
     // 从localStorage获取现有记录
     const existingRecords = localStorage.getItem('login_records');
+    console.log('现有localStorage数据:', existingRecords)
+    
     let records: LoginRecord[] = [];
     
     if (existingRecords) {
       try {
         records = JSON.parse(existingRecords);
+        console.log('解析现有记录成功，数量:', records.length)
       } catch (error) {
         console.error('解析登录记录失败:', error);
       }
+    } else {
+      console.log('没有现有记录，创建新数组')
     }
     
     // 检查是否是第一次登录（根据账号判断）
     const isFirstLogin = !records.some(r => r.account === record.account);
     record.isFirstLogin = isFirstLogin;
+    console.log('是否首次登录:', isFirstLogin)
     
     // 添加新记录
     records.push(record);
+    console.log('添加新记录后，总数量:', records.length)
     
     // 保存到localStorage
-    localStorage.setItem('login_records', JSON.stringify(records));
+    const dataToSave = JSON.stringify(records)
+    console.log('准备保存的数据:', dataToSave)
+    
+    localStorage.setItem('login_records', dataToSave);
+    console.log('数据已保存到localStorage')
+    
+    // 验证保存是否成功
+    const verifyData = localStorage.getItem('login_records')
+    console.log('验证保存结果:', verifyData ? '成功' : '失败')
+    
   } catch (error) {
     console.error('保存登录记录失败:', error);
     throw error; // 重新抛出错误，让调用者处理

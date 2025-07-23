@@ -39,8 +39,7 @@ export default function LoginRecordsPage() {
         description: '欢迎访问后台管理系统',
         duration: 2000,
       })
-      // 获取登录记录
-      fetchLoginRecords()
+      // 登录记录将通过useEffect自动获取
     } else {
       toast.error('登录失败', {
         description: '用户名或密码错误',
@@ -56,14 +55,22 @@ export default function LoginRecordsPage() {
    */
   const fetchLoginRecords = async () => {
     try {
+      console.log('开始获取登录记录...')
+      console.log('localStorage中的原始数据:', localStorage.getItem('login_records'))
       const loginRecords = await getLoginRecords()
       console.log('获取到的登录记录:', loginRecords)
+      console.log('记录数量:', loginRecords.length)
       setRecords(loginRecords)
       setTotalRecords(loginRecords.length)
       if (loginRecords.length > 0) {
         toast.success('数据加载成功', {
           description: `共找到 ${loginRecords.length} 条登录记录`,
           duration: 2000,
+        })
+      } else {
+        toast.info('暂无数据', {
+          description: '没有找到登录记录，请先进行登录测试',
+          duration: 3000,
         })
       }
     } catch (error) {
@@ -179,15 +186,12 @@ export default function LoginRecordsPage() {
     setIsAuthorized(false)
   }, [])
 
-  // 在组件挂载时尝试获取数据（用于调试）
+  // 在用户授权后获取数据
   useEffect(() => {
-    // 延迟执行，确保组件完全挂载
-    const timer = setTimeout(() => {
+    if (isAuthorized) {
       fetchLoginRecords()
-    }, 1000)
-    
-    return () => clearTimeout(timer)
-  }, [])
+    }
+  }, [isAuthorized])
 
   // 如果未授权，显示登录表单
   if (!isAuthorized) {

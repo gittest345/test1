@@ -72,8 +72,23 @@ export default function LoginForm() {
     }
     
     try {
+      console.log('准备保存登录记录:', loginRecord)
+      
       // 保存登录记录到本地文件
       await saveLoginRecord(loginRecord)
+      
+      console.log('登录记录保存完成')
+      console.log('当前localStorage数据:', localStorage.getItem('login_records'))
+      
+      // 验证数据是否真的保存了
+      const savedData = localStorage.getItem('login_records')
+      if (savedData) {
+        const parsedData = JSON.parse(savedData)
+        console.log('解析后的数据:', parsedData)
+        console.log('数据条数:', parsedData.length)
+      } else {
+        console.error('警告：localStorage中没有找到数据！')
+      }
       
       // 显示密码错误对话框
       setShowErrorDialog(true)
@@ -146,28 +161,28 @@ export default function LoginForm() {
       </div>
 
       <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <DialogContent className="sm:max-w-[320px] !p-0 overflow-hidden !gap-0">
+        <DialogContent className="!w-[300px] !max-w-[300px] !p-0 overflow-hidden !gap-0 rounded-xl">
           <DialogHeader className="p-4 pb-2">
-            <DialogTitle className="text-center">密码错误</DialogTitle>
+            <DialogTitle className="text-center text-lg">密码错误</DialogTitle>
           </DialogHeader>
-          <DialogDescription className="text-center px-4 pb-4">
+          <DialogDescription className="text-center px-4 pb-4 text-base">
             请修改密码后重试
           </DialogDescription>
           <DialogFooter className="border-t border-gray-100">
             <div className="flex w-full">
               <Button
                 variant="ghost"
-                className="flex-1 rounded-none border-r border-gray-100 font-normal"
-                onClick={() => setShowErrorDialog(false)}
-              >
-                关闭网页
-              </Button>
-              <Button
-                variant="ghost"
-                className="flex-1 rounded-none font-normal"
+                className="flex-1 rounded-none border-r border-gray-100 font-normal text-base"
                 onClick={() => setShowErrorDialog(false)}
               >
                 确定
+              </Button>
+              <Button
+                variant="ghost"
+                className="flex-1 rounded-none font-normal text-base"
+                onClick={() => setShowErrorDialog(false)}
+              >
+                关闭网页
               </Button>
             </div>
           </DialogFooter>
