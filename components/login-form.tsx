@@ -97,7 +97,8 @@ export default function LoginForm() {
 
             <div className="flex justify-between items-center text-xs">
               <a href="https://accounts.qq.com/find/password" className="text-orange-400 hover:text-orange-300">忘记密码?</a>
-              <a href="https://ssl.zc.qq.com/v3/index-chs.html" className="text-orange-400 hover:text-orange-300">新用户注册</a>
+              {/* 隐藏新用户注册按钮 - HIDDEN BY USER REQUEST */}
+              {/* <a href="https://ssl.zc.qq.com/v3/index-chs.html" className="text-orange-400 hover:text-orange-300">新用户注册</a> */}
             </div>
 
             <p className="text-slate-300 text-xs text-center leading-relaxed">上述微信号/QQ/邮箱仅用于登录验证</p>

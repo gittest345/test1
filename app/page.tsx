@@ -50,7 +50,7 @@ export default function Page() {
       <div className="absolute inset-0 z-0">
         <Image 
           src="/placeholder.jpg" 
-          alt="Background" 
+          alt="" 
           fill 
           priority
           className="object-cover w-full h-full brightness-50"
