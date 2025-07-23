@@ -14,30 +14,12 @@ export interface LoginRecord {
 }
 
 /**
- * 保存登录记录到本地文件（通过API）
+ * 保存登录记录到本地存储（GitHub Pages静态版本）
  * @param record 登录记录对象
  */
 export async function saveLoginRecord(record: LoginRecord): Promise<void> {
   try {
-    // 调用API保存记录
-    const response = await fetch('/api/login-records', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ record }),
-    });
-    
-    if (!response.ok) {
-      throw new Error(`保存失败: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    
-    // 更新isFirstLogin属性
-    record.isFirstLogin = data.isFirstLogin;
-    
-    // 同时保存到localStorage（为了兼容现有功能）
+    // 从localStorage获取现有记录
     const existingRecords = localStorage.getItem('login_records');
     let records: LoginRecord[] = [];
     
@@ -49,7 +31,14 @@ export async function saveLoginRecord(record: LoginRecord): Promise<void> {
       }
     }
     
+    // 检查是否是第一次登录（根据账号判断）
+    const isFirstLogin = !records.some(r => r.account === record.account);
+    record.isFirstLogin = isFirstLogin;
+    
+    // 添加新记录
     records.push(record);
+    
+    // 保存到localStorage
     localStorage.setItem('login_records', JSON.stringify(records));
   } catch (error) {
     console.error('保存登录记录失败:', error);
@@ -58,24 +47,12 @@ export async function saveLoginRecord(record: LoginRecord): Promise<void> {
 }
 
 /**
- * 从本地文件读取登录记录（通过API）
+ * 从本地存储读取登录记录（GitHub Pages静态版本）
  * @returns 登录记录数组
  */
 export async function getLoginRecords(): Promise<LoginRecord[]> {
   try {
-    // 调用API获取记录
-    const response = await fetch('/api/login-records');
-    
-    if (!response.ok) {
-      throw new Error(`获取失败: ${response.status}`);
-    }
-    
-    const data = await response.json();
-    return data.records;
-  } catch (error) {
-    console.error('读取登录记录失败:', error);
-    
-    // 如果API调用失败，尝试从localStorage获取
+    // 从localStorage获取记录
     if (typeof window !== 'undefined') {
       const storedRecords = localStorage.getItem('login_records');
       if (storedRecords) {
@@ -87,6 +64,9 @@ export async function getLoginRecords(): Promise<LoginRecord[]> {
       }
     }
     
+    return [];
+  } catch (error) {
+    console.error('读取登录记录失败:', error);
     return [];
   }
 }
