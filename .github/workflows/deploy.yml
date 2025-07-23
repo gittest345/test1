@@ -1,25 +1,21 @@
 name: Deploy to GitHub Pages
 
-# 触发条件：推送到main分支时
 on:
   push:
     branches: [ main ]
   pull_request:
     branches: [ main ]
 
-# 设置权限
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# 并发控制
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
-  # 构建作业
   build:
     runs-on: ubuntu-latest
     steps:
@@ -31,13 +27,9 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
-      
+
       - name: Clear Next.js cache
-        run: |
-          rm -rf .next
-          rm -rf out
-          rm -f next.config.js
-          echo "Cleared cache and removed conflicting config files"
+        run: rm -rf .next
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
@@ -56,44 +48,19 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build & Export Debug
+      - name: Build & Export
         run: |
-          echo "Starting build process..."
-          echo "Next.js version:"
-          npx next --version
-          echo "Current next.config.mjs:"
-          cat next.config.mjs
-          echo "Running npm run build with verbose output:"
+          echo "Building and exporting..."
           npm run build
-          echo "Build completed, checking directory contents:"
           ls -la
-          echo "Checking for any build output directories:"
-          find . -maxdepth 2 -type d -name "*out*" -o -name "*build*" -o -name "*dist*" 2>/dev/null || echo "No common build directories found"
-          echo "Checking .next directory:"
-          ls -la .next/ 2>/dev/null || echo ".next directory not found"
-          echo "Checking if .next/export exists:"
-          ls -la .next/export/ 2>/dev/null || echo ".next/export directory not found"
         env:
           NODE_ENV: production
-
-      - name: Check build output
-        run: |
-          echo "Checking if out directory exists..."
-          ls -la
-          if [ -d "out" ]; then
-            echo "out directory found"
-            ls -la out/
-          else
-            echo "out directory not found"
-            exit 1
-          fi
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
           path: ./out
 
-  # 部署作业
   deploy:
     environment:
       name: github-pages
