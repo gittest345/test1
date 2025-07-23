@@ -52,13 +52,20 @@ jobs:
       - name: Build & Export Debug
         run: |
           echo "Starting build process..."
-          npm run build
+          echo "Next.js version:"
+          npx next --version
+          echo "Current next.config.mjs:"
+          cat next.config.mjs
+          echo "Running npm run build with verbose output:"
+          npm run build -- --debug
           echo "Build completed, checking directory contents:"
           ls -la
           echo "Checking for any build output directories:"
           find . -maxdepth 2 -type d -name "*out*" -o -name "*build*" -o -name "*dist*" 2>/dev/null || echo "No common build directories found"
           echo "Checking .next directory:"
           ls -la .next/ 2>/dev/null || echo ".next directory not found"
+          echo "Checking if .next/export exists:"
+          ls -la .next/export/ 2>/dev/null || echo ".next/export directory not found"
         env:
           NODE_ENV: production
 
