@@ -21,7 +21,7 @@ export default function PermissionsScreen({ onAllow, onDeny }: PermissionsScreen
       <div className="w-full mx-auto p-4">
         {/* Header */}
         <div className="flex items-center gap-3 mb-4 md:mb-6">
-          <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-red-500 to-orange-500">
+          <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-lg bg-white">
             <div className="w-full h-full bg-center bg-no-repeat bg-contain" 
                  style={{backgroundImage: `url('${basePath}/wz.png')`}} />
           </div>
