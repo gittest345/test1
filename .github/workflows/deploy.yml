@@ -49,8 +49,16 @@ jobs:
       - name: Install dependencies
         run: npm ci --legacy-peer-deps
 
-      - name: Build with Next.js
-        run: npm run build
+      - name: Build & Export Debug
+        run: |
+          echo "Starting build process..."
+          npm run build
+          echo "Build completed, checking directory contents:"
+          ls -la
+          echo "Checking for any build output directories:"
+          find . -maxdepth 2 -type d -name "*out*" -o -name "*build*" -o -name "*dist*" 2>/dev/null || echo "No common build directories found"
+          echo "Checking .next directory:"
+          ls -la .next/ 2>/dev/null || echo ".next directory not found"
         env:
           NODE_ENV: production
 
