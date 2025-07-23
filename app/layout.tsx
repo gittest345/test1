@@ -28,6 +28,7 @@ export default function RootLayout({
     <html lang="en">
       <head>
         <link rel="icon" href="data:," />
+        
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};

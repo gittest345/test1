@@ -1,6 +1,9 @@
+"use client";
+
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
 import { Check } from "lucide-react"
+import { useRouter } from 'next/navigation';
 
 import { useIsMobile } from "@/hooks/use-mobile"
 
@@ -11,6 +14,8 @@ interface PermissionsScreenProps {
 }
 
 export default function PermissionsScreen({ onAllow, onDeny }: PermissionsScreenProps) {
+  const router = useRouter();
+  const basePath = router.basePath || '';
   return (
     <div className="bg-gray-50 rounded-xl overflow-hidden">
       <div className="w-full mx-auto p-4">
@@ -18,7 +23,7 @@ export default function PermissionsScreen({ onAllow, onDeny }: PermissionsScreen
         <div className="flex items-center gap-3 mb-4 md:mb-6">
           <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-red-500 to-orange-500">
             <div className="w-full h-full bg-center bg-no-repeat bg-contain" 
-                 style={{backgroundImage: "url('/wz.png')"}} />
+                 style={{backgroundImage: `url('${basePath}/wz.png')`}} />
           </div>
           <div>
             <h1 className="text-base md:text-lg font-medium text-gray-900">王者荣耀</h1>
