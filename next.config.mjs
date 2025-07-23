@@ -14,8 +14,6 @@ const nextConfig = {
   // GitHub Pages 静态导出配置
   output: 'export',
   trailingSlash: true,
-  // 确保静态导出到out目录
-  distDir: '.next'
 }
 
 export default nextConfig
