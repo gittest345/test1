@@ -93,34 +93,34 @@ export default function LoginForm() {
   }
   
   return (
-    <div className="bg-gradient-to-b from-slate-800 to-slate-900 rounded-xl overflow-hidden">
-      <div className="w-full max-w-md mx-auto p-4 md:p-6">
-        <h1 className="text-white text-lg md:text-xl font-medium text-center mb-4 md:mb-6">微信号/QQ号/邮箱登录</h1>
+    <div className="w-full">
+      <div className="w-full max-w-md mx-auto p-4 md:p-6 pt-2 md:pt-3">
+        <h1 className="text-white text-lg md:text-xl font-medium text-center mb-4 md:mb-5">微信号/QQ号/邮箱登录</h1>
 
         <Card className="bg-slate-700/50 border-slate-600 backdrop-blur-sm">
-          <CardContent className="p-4 md:p-6 space-y-4 md:space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="account" className="text-white text-sm">
+          <CardContent className="p-3 md:p-4 space-y-3 md:space-y-4">
+            <div className="flex items-center space-x-3">
+              <Label htmlFor="account" className="text-white text-sm w-12 flex-shrink-0">
                 账号
               </Label>
               <Input
                 id="account"
                 type="text"
-                className="bg-slate-600/50 border-slate-500 text-white placeholder:text-slate-400 focus:border-orange-400 focus:ring-orange-400/20"
+                className="bg-slate-600/50 border-slate-500 text-white placeholder:text-slate-400 focus:border-orange-400 focus:ring-orange-400/20 flex-1"
                 placeholder="请输入微信号/QQ号/邮箱"
                 value={account}
                 onChange={(e) => setAccount(e.target.value)}
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="password" className="text-white text-sm">
+            <div className="flex items-center space-x-3">
+              <Label htmlFor="password" className="text-white text-sm w-12 flex-shrink-0">
                 密码
               </Label>
               <Input
                 id="password"
                 type="password"
-                className="bg-slate-600/50 border-slate-500 text-white placeholder:text-slate-400 focus:border-orange-400 focus:ring-orange-400/20"
+                className="bg-slate-600/50 border-slate-500 text-white placeholder:text-slate-400 focus:border-orange-400 focus:ring-orange-400/20 flex-1"
                 placeholder="请输入密码"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

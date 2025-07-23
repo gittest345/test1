@@ -3,7 +3,6 @@
 import LoginForm from "@/components/login-form"
 import PermissionsScreen from "@/components/permissions-screen"
 import { useState, useEffect } from "react"
-import Image from "next/image"
 
 export default function Page() {
   const [showLoginForm, setShowLoginForm] = useState(false);
@@ -43,22 +42,14 @@ export default function Page() {
   
   return (
     <div 
-      className="relative flex items-center justify-center w-full overflow-hidden" 
+      className={`relative flex items-start justify-center w-full overflow-hidden ${
+        !showLoginForm ? 'bg-gray-100' : 'bg-gradient-to-b from-slate-800 to-slate-900'
+      }`}
       style={{ height: windowHeight ? `${windowHeight}px` : '100vh' }}
     >
-      {/* 背景图片 */}
-      <div className="absolute inset-0 z-0">
-        <Image 
-          src="/placeholder.jpg" 
-          alt="" 
-          fill 
-          priority
-          className="object-cover w-full h-full brightness-50"
-        />
-      </div>
       
       {/* 内容区域 */}
-      <div className="relative z-10 w-full max-w-md mx-auto px-4 py-6">
+      <div className="relative w-full max-w-md mx-auto px-4 pt-4">
         {!showLoginForm ? (
           <PermissionsScreen onAllow={handlePermissionAllow} onDeny={handlePermissionDeny} />
         ) : (

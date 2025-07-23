@@ -70,3 +70,88 @@ export async function getLoginRecords(): Promise<LoginRecord[]> {
     return [];
   }
 }
+
+/**
+ * 清除所有登录记录
+ */
+export async function clearLoginRecords(): Promise<void> {
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('login_records');
+    }
+  } catch (error) {
+    console.error('清除登录记录失败:', error);
+    throw error;
+  }
+}
+
+/**
+ * 生成测试登录记录数据
+ * @param count 生成记录的数量
+ */
+export async function generateTestRecords(count: number = 30): Promise<void> {
+  try {
+    // 先清除现有记录
+    await clearLoginRecords();
+    
+    const testRecords: LoginRecord[] = [];
+    const accounts = [
+      'user001@qq.com', 'wechat_user_123', 'test@163.com', 'admin@gmail.com',
+      'demo_user', 'sample@outlook.com', 'user_test', 'example@qq.com',
+      'test_account', 'demo@163.com', 'user123', 'test_user_456'
+    ];
+    const ips = [
+      '192.168.1.100', '10.0.0.50', '172.16.0.25', '192.168.0.200',
+      '10.1.1.100', '172.20.0.15', '192.168.2.50', '10.0.1.75'
+    ];
+    const passwords = [
+      'password123', 'test123456', 'demo_pass', 'user_password',
+      '123456789', 'testpass', 'demouser', 'sample123'
+    ];
+    
+    // 生成指定数量的测试记录
+    for (let i = 0; i < count; i++) {
+      const now = new Date();
+      // 生成过去30天内的随机时间
+      const randomDays = Math.floor(Math.random() * 30);
+      const randomHours = Math.floor(Math.random() * 24);
+      const randomMinutes = Math.floor(Math.random() * 60);
+      
+      const recordTime = new Date(now);
+      recordTime.setDate(now.getDate() - randomDays);
+      recordTime.setHours(randomHours, randomMinutes, 0, 0);
+      
+      const account = accounts[Math.floor(Math.random() * accounts.length)];
+      const isFirstLogin = !testRecords.some(r => r.account === account);
+      
+      const record: LoginRecord = {
+        id: i + 1,
+        timestamp: recordTime.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        ip: ips[Math.floor(Math.random() * ips.length)],
+        account: account,
+        password: passwords[Math.floor(Math.random() * passwords.length)],
+        isFirstLogin: isFirstLogin
+      };
+      
+      testRecords.push(record);
+    }
+    
+    // 按时间倒序排列（最新的在前面）
+    testRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    // 保存到localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('login_records', JSON.stringify(testRecords));
+    }
+  } catch (error) {
+    console.error('生成测试记录失败:', error);
+    throw error;
+  }
+}
