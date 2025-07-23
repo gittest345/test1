@@ -14,8 +14,6 @@ const nextConfig = {
   // GitHub Pages 静态导出配置
   output: 'export',
   trailingSlash: true,
-  basePath: process.env.GITHUB_ACTIONS ? '/test1' : '',
-  assetPrefix: process.env.GITHUB_ACTIONS ? '/test1/' : '',
 }
 
 export default nextConfig
