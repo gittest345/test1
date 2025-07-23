@@ -64,7 +64,7 @@ jobs:
           echo "Current next.config.mjs:"
           cat next.config.mjs
           echo "Running npm run build with verbose output:"
-          npm run build -- --debug
+          npm run build
           echo "Build completed, checking directory contents:"
           ls -la
           echo "Checking for any build output directories:"
