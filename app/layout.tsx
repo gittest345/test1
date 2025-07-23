@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import { GeistSans } from 'geist/font/sans'
 import { GeistMono } from 'geist/font/mono'
+import { Toaster } from 'sonner'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -26,6 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="data:," />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
@@ -40,7 +42,18 @@ html {
 }
         `}</style>
       </head>
-      <body className="overflow-hidden min-h-screen w-full">{children}</body>
+      <body className="overflow-hidden min-h-screen w-full">
+        {children}
+        <Toaster 
+          position="top-center"
+          toastOptions={{
+            style: {
+              marginTop: '50vh',
+              transform: 'translateY(-50%)',
+            },
+          }}
+        />
+      </body>
     </html>
   )
 }
