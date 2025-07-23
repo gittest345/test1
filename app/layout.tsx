@@ -27,7 +27,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="data:," />
+        <link rel="icon" href="data:;base64,iVBORw0KGgo=" />
+        <link rel="shortcut icon" href="data:;base64,iVBORw0KGgo=" />
+        <link rel="apple-touch-icon" href="data:;base64,iVBORw0KGgo=" />
         
         <style>{`
 html {
