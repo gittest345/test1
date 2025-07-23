@@ -31,6 +31,13 @@ jobs:
         with:
           node-version: '18'
           cache: 'npm'
+      
+      - name: Clear Next.js cache
+        run: |
+          rm -rf .next
+          rm -rf out
+          rm -f next.config.js
+          echo "Cleared cache and removed conflicting config files"
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
