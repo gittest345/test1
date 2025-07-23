@@ -51,11 +51,16 @@ jobs:
       - name: Build & Export
         run: |
           echo "Building and exporting..."
-          npm run build
-          echo "Build completed, checking out directory..."
-          ls -la out
-          echo "Contents of out directory:"
-          find out -type f -name "*.html" | head -10
+          npm run export
+          echo "Build completed, checking assets..."
+          ls -la
+          if [ -d "out" ]; then
+            echo "out directory found:"
+            ls -la out
+          else
+            echo "ERROR: out directory missing - export may have failed"
+            exit 1
+          fi
         env:
           NODE_ENV: production
 
