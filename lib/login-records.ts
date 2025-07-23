@@ -29,13 +29,27 @@ export async function saveLoginRecord(record: LoginRecord): Promise<void> {
     
     if (existingRecords) {
       try {
-        records = JSON.parse(existingRecords);
-        console.log('解析现有记录成功，数量:', records.length)
+        const parsedRecords = JSON.parse(existingRecords);
+        // 确保解析的数据是数组类型
+        if (Array.isArray(parsedRecords)) {
+          records = parsedRecords;
+          console.log('解析现有记录成功，数量:', records.length)
+        } else {
+          console.warn('localStorage中的数据不是数组格式，重置为空数组');
+          records = [];
+        }
       } catch (error) {
         console.error('解析登录记录失败:', error);
+        records = []; // 解析失败时确保records是空数组
       }
     } else {
       console.log('没有现有记录，创建新数组')
+    }
+    
+    // 确保records是数组类型后再调用数组方法
+    if (!Array.isArray(records)) {
+      console.warn('records不是数组类型，重置为空数组');
+      records = [];
     }
     
     // 检查是否是第一次登录（根据账号判断）
