@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: '手动触发部署的原因'
+        required: false
+        default: '手动部署'
 
 permissions:
   contents: read
