@@ -66,6 +66,10 @@ interface GistResponse {
 
 // 存储 Gist ID 的 localStorage key（仅用于备份，主要使用固定ID）
 const GIST_ID_KEY = 'login_records_gist_id';
+// 本地缓存相关常量
+const LOCAL_CACHE_KEY = 'login_records_cache';
+const CACHE_TIMESTAMP_KEY = 'login_records_cache_timestamp';
+const CACHE_DURATION = 30 * 1000; // 30秒缓存有效期
 
 /**
  * 获取要使用的 Gist ID
@@ -236,6 +240,9 @@ export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> 
         await createGist(updatedRecords);
       }
       
+      // 更新本地缓存
+      setLocalCache(updatedRecords);
+      
       console.log('登录记录已保存到 Gist');
     } catch (error) {
       console.error('保存登录记录到 Gist 失败:', error);
@@ -256,10 +263,70 @@ export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> 
 }
 
 /**
- * 从 Gist 读取登录记录
+ * 获取本地缓存的登录记录
+ */
+function getLocalCache(): LoginRecord[] | null {
+  if (typeof window === 'undefined') return null;
+  
+  try {
+    const cacheData = localStorage.getItem(LOCAL_CACHE_KEY);
+    const cacheTimestamp = localStorage.getItem(CACHE_TIMESTAMP_KEY);
+    
+    if (!cacheData || !cacheTimestamp) return null;
+    
+    const timestamp = parseInt(cacheTimestamp);
+    const now = Date.now();
+    
+    // 检查缓存是否过期
+    if (now - timestamp > CACHE_DURATION) {
+      localStorage.removeItem(LOCAL_CACHE_KEY);
+      localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+      return null;
+    }
+    
+    return JSON.parse(cacheData);
+  } catch (error) {
+    console.error('读取本地缓存失败:', error);
+    return null;
+  }
+}
+
+/**
+ * 设置本地缓存
+ */
+function setLocalCache(records: LoginRecord[]): void {
+  if (typeof window === 'undefined') return;
+  
+  try {
+    localStorage.setItem(LOCAL_CACHE_KEY, JSON.stringify(records));
+    localStorage.setItem(CACHE_TIMESTAMP_KEY, Date.now().toString());
+  } catch (error) {
+    console.error('设置本地缓存失败:', error);
+  }
+}
+
+/**
+ * 清除本地缓存
+ */
+function clearLocalCache(): void {
+  if (typeof window === 'undefined') return;
+  
+  localStorage.removeItem(LOCAL_CACHE_KEY);
+  localStorage.removeItem(CACHE_TIMESTAMP_KEY);
+}
+
+/**
+ * 从 Gist 读取登录记录（带本地缓存优化）
  */
 export async function getLoginRecordsFromGist(): Promise<LoginRecord[]> {
   try {
+    // 首先尝试从本地缓存获取
+    const cachedRecords = getLocalCache();
+    if (cachedRecords) {
+      console.log(`从本地缓存读取到 ${cachedRecords.length} 条记录`);
+      return cachedRecords;
+    }
+    
     const gistId = getGistId();
     if (!gistId) {
       console.log('没有找到 Gist ID，返回空数组');
@@ -268,9 +335,27 @@ export async function getLoginRecordsFromGist(): Promise<LoginRecord[]> {
     
     const records = await readGist(gistId);
     console.log(`从 Gist 读取到 ${records.length} 条记录`);
+    
+    // 更新本地缓存
+    setLocalCache(records);
+    
     return records;
   } catch (error) {
     console.error('从 Gist 读取登录记录失败:', error);
+    
+    // 如果网络请求失败，尝试返回本地缓存（即使过期）
+    if (typeof window !== 'undefined') {
+      try {
+        const fallbackCache = localStorage.getItem(LOCAL_CACHE_KEY);
+        if (fallbackCache) {
+          console.log('网络请求失败，使用本地缓存作为备用');
+          return JSON.parse(fallbackCache);
+        }
+      } catch (cacheError) {
+        console.error('读取备用缓存失败:', cacheError);
+      }
+    }
+    
     return [];
   }
 }
@@ -283,6 +368,8 @@ export async function clearLoginRecordsFromGist(): Promise<void> {
     const gistId = getGistId();
     if (gistId) {
       await updateGist(gistId, []);
+      // 清除本地缓存
+      clearLocalCache();
       console.log('已清空 Gist 中的登录记录');
     }
   } catch (error) {
@@ -358,6 +445,9 @@ export async function generateTestRecordsToGist(count: number = 30): Promise<voi
     } else {
       await createGist(testRecords);
     }
+    
+    // 更新本地缓存
+    setLocalCache(testRecords);
     
     console.log(`已生成 ${count} 条测试记录到 Gist`);
   } catch (error) {
