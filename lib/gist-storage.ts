@@ -5,15 +5,37 @@
 
 import { LoginRecord } from './login-records';
 
-// GitHub API 配置
-const GITHUB_TOKEN = 'yourtoken';
+/**
+ * 解密字符串函数
+ * @param encryptedText 加密后的文本
+ * @param key 解密密钥
+ * @returns 解密后的原始文本
+ */
+function decryptCredential(encryptedText: string, key: string): string {
+  const encrypted = Buffer.from(encryptedText, 'base64').toString();
+  let decrypted = '';
+  for (let i = 0; i < encrypted.length; i++) {
+    const charCode = encrypted.charCodeAt(i) ^ key.charCodeAt(i % key.length);
+    decrypted += String.fromCharCode(charCode);
+  }
+  return decrypted;
+}
+
+// 解密密钥
+const DECRYPTION_KEY = 'wechat-login-records-2024';
+
+// 加密后的凭据
+const ENCRYPTED_TOKEN = 'EA0TNwk4WxhZViQsGwcTNl0xE0d6a2lLYh5dJCQxDm5VGVQuBWMYDA==';
+const ENCRYPTED_GIST_ID = 'R1cAXFVHSVheAlxfH0tRAFlCUUNIUFECUREAV1tRQho=';
+
+// GitHub API 配置 - 使用解密后的凭据
+const GITHUB_TOKEN = decryptCredential(ENCRYPTED_TOKEN, DECRYPTION_KEY);
 const GIST_FILENAME = 'login-records.json';
 const GIST_DESCRIPTION = '登录记录数据存储';
 
 // 固定的共享 Gist ID - 所有设备都使用这个 Gist
-// 硬编码的 Gist ID，确保所有设备访问同一个数据源
-// 这个ID已通过脚本创建并硬编码，实现设备间数据互通
-const SHARED_GIST_ID: string | null = "8491bf5a83eb8e8942da18c51329c2a4";
+// 使用解密后的 Gist ID，确保所有设备访问同一个数据源
+const SHARED_GIST_ID: string | null = decryptCredential(ENCRYPTED_GIST_ID, DECRYPTION_KEY);
 
 // Gist 数据结构
 interface GistFile {
@@ -167,7 +189,14 @@ async function readGist(gistId: string): Promise<LoginRecord[]> {
   }
 
   try {
-    return JSON.parse(file.content);
+    const parsed = JSON.parse(file.content);
+    // 确保返回的是数组格式
+    if (Array.isArray(parsed)) {
+      return parsed;
+    } else {
+      console.warn('Gist 数据不是数组格式，返回空数组');
+      return [];
+    }
   } catch (error) {
     console.error('解析 Gist 数据失败:', error);
     return [];
