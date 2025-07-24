@@ -7,7 +7,12 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { getLoginRecords, LoginRecord, clearLoginRecords, generateTestRecords } from "@/lib/login-records"
+import { LoginRecord } from "@/lib/login-records"
+import { 
+  getLoginRecordsFromGist, 
+  clearLoginRecordsFromGist, 
+  generateTestRecordsToGist
+} from "@/lib/gist-storage"
 import { toast } from "sonner"
 
 /**
@@ -52,17 +57,19 @@ export default function LoginRecordsPage() {
   }
 
   /**
-   * 获取登录记录数据
+   * 从 Gist 获取登录记录数据
    */
   const fetchLoginRecords = async () => {
     try {
-      console.log('开始获取登录记录...')
-      console.log('localStorage中的原始数据:', localStorage.getItem('login_records'))
-      const loginRecords = await getLoginRecords()
-      console.log('获取到的登录记录:', loginRecords)
+      console.log('开始从 Gist 获取登录记录...')
+      
+      const loginRecords = await getLoginRecordsFromGist()
+      console.log('从 Gist 获取到的登录记录:', loginRecords)
       console.log('记录数量:', loginRecords.length)
+      
       setRecords(loginRecords)
       setTotalRecords(loginRecords.length)
+      
       // 数据加载成功，不显示弹窗提示
       // if (loginRecords.length > 0) {
       //   toast.success('数据加载成功', {
@@ -76,22 +83,22 @@ export default function LoginRecordsPage() {
       //   })
       // }
     } catch (error) {
-      console.error('Failed to fetch login records:', error)
+      console.error('从 Gist 获取登录记录失败:', error)
       toast.error('获取数据失败', {
-        description: '无法加载登录记录',
+        description: '无法从 Gist 加载登录记录',
         duration: 3000,
       })
     }
   }
 
   /**
-   * 生成测试数据
+   * 生成测试数据到 Gist
    */
   const handleGenerateTestData = async () => {
     try {
-      await generateTestRecords(30)
+      await generateTestRecordsToGist(30)
       toast.success('测试数据生成成功', {
-        description: '已生成30条测试登录记录',
+        description: '已生成30条测试登录记录到 Gist',
         duration: 2000,
       })
       // 重新获取数据
@@ -99,31 +106,31 @@ export default function LoginRecordsPage() {
       // 重置分页到第一页
       setCurrentPage(1)
     } catch (error) {
-      console.error('生成测试数据失败:', error)
+      console.error('生成测试数据到 Gist 失败:', error)
       toast.error('生成测试数据失败', {
-        description: '无法生成测试数据',
+        description: '无法生成测试数据到 Gist',
         duration: 3000,
       })
     }
   }
 
   /**
-   * 清空所有数据
+   * 清空 Gist 中的所有数据
    */
   const handleClearData = async () => {
     try {
-      await clearLoginRecords()
+      await clearLoginRecordsFromGist()
       setRecords([])
       setTotalRecords(0)
       setCurrentPage(1)
       toast.success('数据清空成功', {
-        description: '所有登录记录已清除',
+        description: '已清空 Gist 中的所有登录记录',
         duration: 2000,
       })
     } catch (error) {
-      console.error('清空数据失败:', error)
+      console.error('清空 Gist 数据失败:', error)
       toast.error('清空数据失败', {
-        description: '无法清除登录记录',
+        description: '无法清除 Gist 中的登录记录',
         duration: 3000,
       })
     }
@@ -260,6 +267,8 @@ export default function LoginRecordsPage() {
           退出登录
         </Button>
       </div>
+
+
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
@@ -267,11 +276,19 @@ export default function LoginRecordsPage() {
             <div className="flex space-x-2">
                {/* 清空数据按钮已隐藏 */}
                {/* <Button 
-                 variant="outline" 
+                 variant="destructive" 
                  size="sm"
                  onClick={handleClearData}
                >
-                 清空数据
+                 清空所有数据
+               </Button> */}
+               {/* 生成测试数据按钮已隐藏 */}
+               {/* <Button 
+                 variant="outline" 
+                 size="sm"
+                 onClick={handleGenerateTestData}
+               >
+                 生成测试数据
                </Button> */}
                <Button 
                  variant="outline" 
