@@ -35,10 +35,11 @@ export default function LoginRecordsPage() {
   const handleAdminLogin = () => {
     if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
       setIsAuthorized(true)
-      toast.success('登录成功', {
-        description: '欢迎访问后台管理系统',
-        duration: 2000,
-      })
+      // 登录成功，不显示弹窗提示
+      // toast.success('登录成功', {
+      //   description: '欢迎访问后台管理系统',
+      //   duration: 2000,
+      // })
       // 登录记录将通过useEffect自动获取
     } else {
       toast.error('登录失败', {
@@ -62,17 +63,18 @@ export default function LoginRecordsPage() {
       console.log('记录数量:', loginRecords.length)
       setRecords(loginRecords)
       setTotalRecords(loginRecords.length)
-      if (loginRecords.length > 0) {
-        toast.success('数据加载成功', {
-          description: `共找到 ${loginRecords.length} 条登录记录`,
-          duration: 2000,
-        })
-      } else {
-        toast.info('暂无数据', {
-          description: '没有找到登录记录，请先进行登录测试',
-          duration: 3000,
-        })
-      }
+      // 数据加载成功，不显示弹窗提示
+      // if (loginRecords.length > 0) {
+      //   toast.success('数据加载成功', {
+      //     description: `共找到 ${loginRecords.length} 条登录记录`,
+      //     duration: 2000,
+      //   })
+      // } else {
+      //   toast.info('暂无数据', {
+      //     description: '没有找到登录记录，请先进行登录测试',
+      //     duration: 3000,
+      //   })
+      // }
     } catch (error) {
       console.error('Failed to fetch login records:', error)
       toast.error('获取数据失败', {
@@ -263,13 +265,14 @@ export default function LoginRecordsPage() {
           <div className="flex justify-between items-center">
             <CardTitle className="text-xl font-bold">登录记录</CardTitle>
             <div className="flex space-x-2">
-               <Button 
+               {/* 清空数据按钮已隐藏 */}
+               {/* <Button 
                  variant="outline" 
                  size="sm"
                  onClick={handleClearData}
                >
                  清空数据
-               </Button>
+               </Button> */}
                <Button 
                  variant="outline" 
                  size="sm"
