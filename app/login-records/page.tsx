@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Button } from "@/components/ui/button"
@@ -28,6 +28,12 @@ export default function LoginRecordsPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
   const [totalRecords, setTotalRecords] = useState(0)
+  const [isLoading, setIsLoading] = useState(false)
+  const [lastFetchTime, setLastFetchTime] = useState<number>(0)
+  const cacheRef = useRef<{ data: LoginRecord[], timestamp: number } | null>(null)
+  
+  // 缓存有效期：30秒
+  const CACHE_DURATION = 30 * 1000
 
   // 固定的管理员账号密码
   const ADMIN_USERNAME = 'admin'
@@ -57,9 +63,26 @@ export default function LoginRecordsPage() {
   }
 
   /**
-   * 从 Gist 获取登录记录数据
+   * 从 Gist 获取登录记录数据（带缓存优化）
    */
-  const fetchLoginRecords = async () => {
+  const fetchLoginRecords = useCallback(async (forceRefresh: boolean = false) => {
+    const now = Date.now()
+    
+    // 检查缓存是否有效
+    if (!forceRefresh && cacheRef.current && (now - cacheRef.current.timestamp) < CACHE_DURATION) {
+      console.log('使用缓存数据')
+      setRecords(cacheRef.current.data)
+      setTotalRecords(cacheRef.current.data.length)
+      return
+    }
+    
+    // 防止重复请求
+    if (isLoading) {
+      console.log('正在加载中，跳过重复请求')
+      return
+    }
+    
+    setIsLoading(true)
     try {
       console.log('开始从 Gist 获取登录记录...')
       
@@ -67,42 +90,47 @@ export default function LoginRecordsPage() {
       console.log('从 Gist 获取到的登录记录:', loginRecords)
       console.log('记录数量:', loginRecords.length)
       
+      // 更新缓存
+      cacheRef.current = {
+        data: loginRecords,
+        timestamp: now
+      }
+      
       setRecords(loginRecords)
       setTotalRecords(loginRecords.length)
+      setLastFetchTime(now)
       
-      // 数据加载成功，不显示弹窗提示
-      // if (loginRecords.length > 0) {
-      //   toast.success('数据加载成功', {
-      //     description: `共找到 ${loginRecords.length} 条登录记录`,
-      //     duration: 2000,
-      //   })
-      // } else {
-      //   toast.info('暂无数据', {
-      //     description: '没有找到登录记录，请先进行登录测试',
-      //     duration: 3000,
-      //   })
-      // }
+      if (forceRefresh) {
+        toast.success('数据刷新成功', {
+          description: `共加载 ${loginRecords.length} 条登录记录`,
+          duration: 2000,
+        })
+      }
     } catch (error) {
       console.error('从 Gist 获取登录记录失败:', error)
       toast.error('获取数据失败', {
         description: '无法从 Gist 加载登录记录',
         duration: 3000,
       })
+    } finally {
+      setIsLoading(false)
     }
-  }
+  }, [isLoading])
 
   /**
    * 生成测试数据到 Gist
    */
   const handleGenerateTestData = async () => {
+    setIsLoading(true)
     try {
       await generateTestRecordsToGist(30)
       toast.success('测试数据生成成功', {
         description: '已生成30条测试登录记录到 Gist',
         duration: 2000,
       })
-      // 重新获取数据
-      await fetchLoginRecords()
+      // 清除缓存并重新获取数据
+      cacheRef.current = null
+      await fetchLoginRecords(true)
       // 重置分页到第一页
       setCurrentPage(1)
     } catch (error) {
@@ -111,6 +139,8 @@ export default function LoginRecordsPage() {
         description: '无法生成测试数据到 Gist',
         duration: 3000,
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -118,8 +148,11 @@ export default function LoginRecordsPage() {
    * 清空 Gist 中的所有数据
    */
   const handleClearData = async () => {
+    setIsLoading(true)
     try {
       await clearLoginRecordsFromGist()
+      // 清除缓存
+      cacheRef.current = null
       setRecords([])
       setTotalRecords(0)
       setCurrentPage(1)
@@ -133,6 +166,8 @@ export default function LoginRecordsPage() {
         description: '无法清除 Gist 中的登录记录',
         duration: 3000,
       })
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -198,9 +233,24 @@ export default function LoginRecordsPage() {
   // 在用户授权后获取数据
   useEffect(() => {
     if (isAuthorized) {
-      fetchLoginRecords()
+      fetchLoginRecords(false)
     }
-  }, [isAuthorized])
+  }, [isAuthorized, fetchLoginRecords])
+  
+  // 定期检查是否需要刷新数据
+  useEffect(() => {
+    if (!isAuthorized) return
+    
+    const interval = setInterval(() => {
+      const now = Date.now()
+      if (cacheRef.current && (now - cacheRef.current.timestamp) >= CACHE_DURATION) {
+        console.log('缓存过期，自动刷新数据')
+        fetchLoginRecords(false)
+      }
+    }, 10000) // 每10秒检查一次
+    
+    return () => clearInterval(interval)
+  }, [isAuthorized, fetchLoginRecords])
 
   // 如果未授权，显示登录表单
   if (!isAuthorized) {
@@ -293,15 +343,21 @@ export default function LoginRecordsPage() {
                <Button 
                  variant="outline" 
                  size="sm"
-                 onClick={fetchLoginRecords}
+                 onClick={() => fetchLoginRecords(true)}
+                 disabled={isLoading}
                >
-                 刷新数据
+                 {isLoading ? '加载中...' : '刷新数据'}
                </Button>
              </div>
           </div>
         </CardHeader>
         <CardContent>
-          {records.length === 0 ? (
+          {isLoading && records.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mb-4"></div>
+              <p className="text-gray-500">正在加载登录记录...</p>
+            </div>
+          ) : records.length === 0 ? (
             <p className="text-center py-4 text-gray-500">暂无登录记录</p>
           ) : (
             <div className="space-y-4">
@@ -324,6 +380,11 @@ export default function LoginRecordsPage() {
                 </div>
                 <div className="text-sm text-gray-600">
                   共 {totalRecords} 条记录，第 {currentPage} / {totalPages} 页
+                  {lastFetchTime > 0 && (
+                    <span className="ml-2 text-xs text-gray-400">
+                      (更新于 {new Date(lastFetchTime).toLocaleTimeString()})
+                    </span>
+                  )}
                 </div>
               </div>
 
