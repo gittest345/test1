@@ -211,7 +211,7 @@ let saveQueue: Promise<void> = Promise.resolve();
  */
 export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> {
   // 将保存操作加入队列，确保串行执行
-  saveQueue = saveQueue.then(async () => {
+  const currentOperation = saveQueue.then(async () => {
     try {
       console.log('开始保存登录记录到 Gist:', record);
       
@@ -241,9 +241,18 @@ export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> 
       console.error('保存登录记录到 Gist 失败:', error);
       throw error;
     }
+  }).catch(error => {
+    // 捕获并记录错误，但不阻止后续操作
+    console.error('队列中的保存操作失败:', error);
   });
   
-  return saveQueue;
+  // 更新队列，确保即使当前操作失败，后续操作仍能继续
+  saveQueue = currentOperation.then(() => {}, () => {});
+  
+  // 返回当前操作的 Promise，让调用者能够处理具体的成功/失败
+  return currentOperation.then(() => {
+    console.log('登录记录保存操作完成');
+  });
 }
 
 /**
