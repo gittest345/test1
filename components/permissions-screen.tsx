@@ -18,7 +18,7 @@ export default function PermissionsScreen({ onAllow, onDeny }: PermissionsScreen
         <div className="flex items-center gap-3 mb-4 md:mb-6">
           <div className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-red-500 to-orange-500">
             <div className="w-full h-full bg-center bg-no-repeat bg-contain" 
-                 style={{backgroundImage: "url('/wz.png')"}} />
+                 style={{backgroundImage: "url('https://s1.aigei.com/src/img/png/2e/2edabeec5d8043cd92ffbaaeb3737dee.png?e=2051020800&token=P7S2Xpzfz11vAkASLTkfHN7Fw-oOZBecqeJaxypL:AHS6YfNwvjcdR1v6uXBLdo2tCiM=')"}} />
           </div>
           <div>
             <h1 className="text-base md:text-lg font-medium text-gray-900">王者荣耀</h1>
