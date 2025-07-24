@@ -3,8 +3,18 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [ main ]
+    paths:
+      - 'start'
+      - 'start.txt'
+      - 'start.md'
+      - '.github/workflows/**'
   pull_request:
     branches: [ main ]
+    paths:
+      - 'start'
+      - 'start.txt'
+      - 'start.md'
+      - '.github/workflows/**'
   workflow_dispatch:
     inputs:
       reason:
