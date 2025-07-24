@@ -6,7 +6,7 @@
 import { LoginRecord } from './login-records';
 
 // GitHub API 配置
-const GITHUB_TOKEN = 'yourtoken';
+const GITHUB_TOKEN = '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';
 const GIST_FILENAME = 'login-records.json';
 const GIST_DESCRIPTION = '登录记录数据存储';
 
