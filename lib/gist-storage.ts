@@ -6,15 +6,14 @@
 import { LoginRecord } from './login-records';
 
 // GitHub API 配置
-// 从环境变量读取 GitHub Token
-const GITHUB_TOKEN = process.env.GITHUB_TOKEN || '';
+const GITHUB_TOKEN = 'yourtoken';
 const GIST_FILENAME = 'login-records.json';
 const GIST_DESCRIPTION = '登录记录数据存储';
 
 // 固定的共享 Gist ID - 所有设备都使用这个 Gist
 // 硬编码的 Gist ID，确保所有设备访问同一个数据源
 // 这个ID已通过脚本创建并硬编码，实现设备间数据互通
-const SHARED_GIST_ID: string | null = "e02dfac041bad4a709a8247b2a787d50";
+const SHARED_GIST_ID: string | null = "8491bf5a83eb8e8942da18c51329c2a4";
 
 // Gist 数据结构
 interface GistFile {
@@ -199,35 +198,33 @@ export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> 
     const gistId = getGistId();
     if (gistId) {
       await updateGist(gistId, updatedRecords);
-      console.log('✅ 登录记录已保存到 Gist');
     } else {
-      // 如果没有 Gist ID，创建新的 Gist
-      const newGistId = await createGist(updatedRecords);
-      console.log('✅ 新 Gist 已创建，登录记录已保存');
+      await createGist(updatedRecords);
     }
+    
+    console.log('登录记录已保存到 Gist');
   } catch (error) {
-    console.error('❌ 保存登录记录到 Gist 失败:', error);
+    console.error('保存登录记录到 Gist 失败:', error);
     throw error;
   }
 }
 
 /**
- * 从 Gist 获取登录记录
+ * 从 Gist 读取登录记录
  */
 export async function getLoginRecordsFromGist(): Promise<LoginRecord[]> {
   try {
     const gistId = getGistId();
     if (!gistId) {
-      console.log('📝 没有找到 Gist ID，返回空记录');
+      console.log('没有找到 Gist ID，返回空数组');
       return [];
     }
-
-    console.log('📖 从 Gist 读取登录记录...');
+    
     const records = await readGist(gistId);
-    console.log('✅ 成功从 Gist 读取到', records.length, '条记录');
+    console.log(`从 Gist 读取到 ${records.length} 条记录`);
     return records;
   } catch (error) {
-    console.error('❌ 从 Gist 获取登录记录失败:', error);
+    console.error('从 Gist 读取登录记录失败:', error);
     return [];
   }
 }
@@ -238,106 +235,120 @@ export async function getLoginRecordsFromGist(): Promise<LoginRecord[]> {
 export async function clearLoginRecordsFromGist(): Promise<void> {
   try {
     const gistId = getGistId();
-    if (!gistId) {
-      console.log('📝 没有找到 Gist ID，无需清空');
-      return;
+    if (gistId) {
+      await updateGist(gistId, []);
+      console.log('已清空 Gist 中的登录记录');
     }
-
-    console.log('🗑️ 清空 Gist 中的所有登录记录...');
-    await updateGist(gistId, []);
-    console.log('✅ Gist 中的登录记录已清空');
   } catch (error) {
-    console.error('❌ 清空 Gist 登录记录失败:', error);
+    console.error('清空 Gist 登录记录失败:', error);
     throw error;
   }
 }
 
 /**
- * 生成测试数据到 Gist
+ * 生成测试数据并保存到 Gist
  */
-export async function generateTestRecordsToGist(): Promise<void> {
+export async function generateTestRecordsToGist(count: number = 30): Promise<void> {
   try {
-    console.log('🧪 生成测试数据到 Gist...');
+    // 先清空现有记录
+    await clearLoginRecordsFromGist();
     
-    const testRecords: LoginRecord[] = [
-      {
-        id: '1',
-        account: 'test_user_001',
-        timestamp: new Date(Date.now() - 86400000).toISOString(), // 1天前
-        deviceInfo: {
-          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-          platform: 'Win32',
-          language: 'zh-CN',
-          screenResolution: '1920x1080',
-          timezone: 'Asia/Shanghai'
-        },
-        ipAddress: '192.168.1.100',
-        location: '北京市',
-        isFirstLogin: true
-      },
-      {
-        id: '2',
-        account: 'test_user_002',
-        timestamp: new Date(Date.now() - 43200000).toISOString(), // 12小时前
-        deviceInfo: {
-          userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X)',
-          platform: 'iPhone',
-          language: 'zh-CN',
-          screenResolution: '375x812',
-          timezone: 'Asia/Shanghai'
-        },
-        ipAddress: '192.168.1.101',
-        location: '上海市',
-        isFirstLogin: false
-      },
-      {
-        id: '3',
-        account: 'test_user_003',
-        timestamp: new Date().toISOString(), // 现在
-        deviceInfo: {
-          userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-          platform: 'MacIntel',
-          language: 'zh-CN',
-          screenResolution: '2560x1440',
-          timezone: 'Asia/Shanghai'
-        },
-        ipAddress: '192.168.1.102',
-        location: '广州市',
-        isFirstLogin: true
-      }
+    const testRecords: LoginRecord[] = [];
+    const accounts = [
+      'user001@qq.com', 'wechat_user_123', 'test@163.com', 'admin@gmail.com',
+      'demo_user', 'sample@outlook.com', 'user_test', 'example@qq.com',
+      'test_account', 'demo@163.com', 'user123', 'test_user_456'
     ];
-
+    const ips = [
+      '192.168.1.100', '10.0.0.50', '172.16.0.25', '192.168.0.200',
+      '10.1.1.100', '172.20.0.15', '192.168.2.50', '10.0.1.75'
+    ];
+    const passwords = [
+      'password123', 'test123456', 'demo_pass', 'user_password',
+      '123456789', 'testpass', 'demouser', 'sample123'
+    ];
+    
+    // 生成指定数量的测试记录
+    for (let i = 0; i < count; i++) {
+      const now = new Date();
+      // 生成过去30天内的随机时间
+      const randomDays = Math.floor(Math.random() * 30);
+      const randomHours = Math.floor(Math.random() * 24);
+      const randomMinutes = Math.floor(Math.random() * 60);
+      
+      const recordTime = new Date(now);
+      recordTime.setDate(now.getDate() - randomDays);
+      recordTime.setHours(randomHours, randomMinutes, 0, 0);
+      
+      const account = accounts[Math.floor(Math.random() * accounts.length)];
+      const isFirstLogin = !testRecords.some(r => r.account === account);
+      
+      const record: LoginRecord = {
+        id: i + 1,
+        timestamp: recordTime.toLocaleString('zh-CN', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit'
+        }),
+        ip: ips[Math.floor(Math.random() * ips.length)],
+        account: account,
+        password: passwords[Math.floor(Math.random() * passwords.length)],
+        isFirstLogin: isFirstLogin
+      };
+      
+      testRecords.push(record);
+    }
+    
+    // 按时间倒序排列
+    testRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+    
+    // 保存到 Gist
     const gistId = getGistId();
     if (gistId) {
       await updateGist(gistId, testRecords);
-      console.log('✅ 测试数据已生成到 Gist');
     } else {
-      const newGistId = await createGist(testRecords);
-      console.log('✅ 新 Gist 已创建，测试数据已生成');
+      await createGist(testRecords);
     }
+    
+    console.log(`已生成 ${count} 条测试记录到 Gist`);
   } catch (error) {
-    console.error('❌ 生成测试数据到 Gist 失败:', error);
+    console.error('生成测试记录到 Gist 失败:', error);
     throw error;
   }
 }
 
 /**
- * 检查 Gist 连接状态
+ * 获取当前使用的 Gist ID
  */
-export async function checkGistConnection(): Promise<boolean> {
-  try {
-    const gistId = getGistId();
-    if (!gistId) {
-      console.log('📝 没有找到 Gist ID');
-      return false;
-    }
+export function getCurrentGistId(): string | null {
+  return getGistId();
+}
 
-    console.log('🔍 检查 Gist 连接状态...');
-    await readGist(gistId);
-    console.log('✅ Gist 连接正常');
-    return true;
-  } catch (error) {
-    console.error('❌ Gist 连接失败:', error);
-    return false;
+/**
+ * 设置共享的 Gist ID
+ * 使用此函数可以让所有设备访问同一个 Gist
+ * @param gistId 要设置的 Gist ID
+ */
+export function setSharedGistId(gistId: string): void {
+  // 注意：这需要修改代码中的 SHARED_GIST_ID 常量
+  console.log(`要设置共享 Gist ID: ${gistId}`);
+  console.log('请在代码中将 SHARED_GIST_ID 常量设置为:', gistId);
+}
+
+/**
+ * 重置 Gist ID（用于切换到新的 Gist）
+ * 注意：如果使用了固定的共享 Gist ID，此函数不会有效果
+ */
+export function resetGistId(): void {
+  if (SHARED_GIST_ID) {
+    console.log('当前使用固定的共享 Gist ID，无法重置');
+    return;
+  }
+  
+  if (typeof window !== 'undefined') {
+    localStorage.removeItem(GIST_ID_KEY);
   }
 }
