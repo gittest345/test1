@@ -203,39 +203,47 @@ async function readGist(gistId: string): Promise<LoginRecord[]> {
   }
 }
 
+// 用于处理并发保存请求的队列
+let saveQueue: Promise<void> = Promise.resolve();
+
 /**
- * 保存登录记录到 Gist
+ * 保存登录记录到 Gist（支持并发安全）
  */
 export async function saveLoginRecordToGist(record: LoginRecord): Promise<void> {
-  try {
-    console.log('开始保存登录记录到 Gist:', record);
-    
-    // 获取现有记录
-    const existingRecords = await getLoginRecordsFromGist();
-    
-    // 检查是否是第一次登录
-    const isFirstLogin = !existingRecords.some(r => r.account === record.account);
-    record.isFirstLogin = isFirstLogin;
-    
-    // 添加新记录
-    const updatedRecords = [...existingRecords, record];
-    
-    // 按时间倒序排列
-    updatedRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
-    
-    // 保存到 Gist
-    const gistId = getGistId();
-    if (gistId) {
-      await updateGist(gistId, updatedRecords);
-    } else {
-      await createGist(updatedRecords);
+  // 将保存操作加入队列，确保串行执行
+  saveQueue = saveQueue.then(async () => {
+    try {
+      console.log('开始保存登录记录到 Gist:', record);
+      
+      // 获取现有记录
+      const existingRecords = await getLoginRecordsFromGist();
+      
+      // 检查是否是第一次登录
+      const isFirstLogin = !existingRecords.some(r => r.account === record.account);
+      record.isFirstLogin = isFirstLogin;
+      
+      // 添加新记录
+      const updatedRecords = [...existingRecords, record];
+      
+      // 按时间倒序排列
+      updatedRecords.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      
+      // 保存到 Gist
+      const gistId = getGistId();
+      if (gistId) {
+        await updateGist(gistId, updatedRecords);
+      } else {
+        await createGist(updatedRecords);
+      }
+      
+      console.log('登录记录已保存到 Gist');
+    } catch (error) {
+      console.error('保存登录记录到 Gist 失败:', error);
+      throw error;
     }
-    
-    console.log('登录记录已保存到 Gist');
-  } catch (error) {
-    console.error('保存登录记录到 Gist 失败:', error);
-    throw error;
-  }
+  });
+  
+  return saveQueue;
 }
 
 /**
