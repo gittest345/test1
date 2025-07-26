@@ -1,0 +1,34 @@
+{
+  "posts": [
+    {
+      "id": 1,
+      "title": "欢迎来到我的博客",
+      "slug": "welcome-to-my-blog",
+      "excerpt": "这是我的第一篇博客文章，欢迎大家来到我的个人博客空间。",
+      "content": "# 欢迎来到我的博客\n\n这是我的第一篇博客文章。在这里，我将分享我的技术学习心得、生活感悟和有趣的项目。\n\n## 关于这个博客\n\n这个博客使用 Next.js 构建，采用静态生成的方式，所有文章内容都存储在本地 JSON 文件中。每当我推送新的内容到 GitHub 时，会自动触发部署流程。\n\n## 技术栈\n\n- Next.js 14\n- TypeScript\n- Tailwind CSS\n- GitHub Actions\n\n希望你喜欢这个简洁的博客设计！",
+      "author": "博主",
+      "publishDate": "2024-01-15",
+      "tags": ["欢迎", "介绍", "技术"]
+    },
+    {
+      "id": 2,
+      "title": "Next.js 静态生成最佳实践",
+      "slug": "nextjs-static-generation-best-practices",
+      "excerpt": "探讨如何使用 Next.js 的静态生成功能构建高性能的博客网站。",
+      "content": "# Next.js 静态生成最佳实践\n\n静态生成（Static Generation）是 Next.js 最强大的功能之一，它可以在构建时预渲染页面，提供极佳的性能和SEO效果。\n\n## 什么是静态生成\n\n静态生成是指在构建时生成HTML页面，而不是在每次请求时生成。这意味着页面可以被CDN缓存，加载速度极快。\n\n## 使用场景\n\n- 博客文章\n- 产品页面\n- 文档网站\n- 营销页面\n\n## 实现方法\n\n使用 `getStaticProps` 和 `getStaticPaths` 来实现静态生成：\n\n```typescript\nexport async function getStaticProps() {\n  const posts = await fetchPosts()\n  return {\n    props: { posts }\n  }\n}\n```\n\n这种方法既保证了性能，又提供了良好的开发体验。",
+      "author": "博主",
+      "publishDate": "2024-01-20",
+      "tags": ["Next.js", "静态生成", "性能优化"]
+    },
+    {
+      "id": 3,
+      "title": "使用 Tailwind CSS 构建现代UI",
+      "slug": "building-modern-ui-with-tailwind",
+      "excerpt": "学习如何使用 Tailwind CSS 快速构建美观且响应式的用户界面。",
+      "content": "# 使用 Tailwind CSS 构建现代UI\n\nTailwind CSS 是一个功能优先的 CSS 框架，它提供了大量的实用工具类，让我们能够快速构建现代化的用户界面。\n\n## 为什么选择 Tailwind\n\n1. **快速开发** - 无需离开HTML即可设计样式\n2. **响应式设计** - 内置响应式修饰符\n3. **可定制性** - 完全可配置的设计系统\n4. **性能优化** - 自动清除未使用的CSS\n\n## 核心概念\n\n### 实用工具类\n\n```html\n<div class=\"bg-blue-500 text-white p-4 rounded-lg\">\n  这是一个蓝色背景的卡片\n</div>\n```\n\n### 响应式设计\n\n```html\n<div class=\"text-sm md:text-base lg:text-lg\">\n  响应式文字大小\n</div>\n```\n\n### 状态变体\n\n```html\n<button class=\"bg-blue-500 hover:bg-blue-700 transition-colors\">\n  悬停效果按钮\n</button>\n```\n\nTailwind CSS 让我们能够快速实现设计想法，同时保持代码的整洁和可维护性。",
+      "author": "博主",
+      "publishDate": "2024-01-25",
+      "tags": ["Tailwind CSS", "UI设计", "前端开发"]
+    }
+  ]
+}

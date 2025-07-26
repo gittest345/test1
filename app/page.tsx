@@ -1,61 +1,82 @@
-"use client"
+import Link from 'next/link'
+import { getAllPosts } from '../lib/blog'
 
-import LoginForm from "@/components/login-form"
-import PermissionsScreen from "@/components/permissions-screen"
-import { useState, useEffect } from "react"
+/**
+ * 博客主页组件 - 展示所有博客文章列表
+ * @returns JSX元素
+ */
+export default function Home() {
+  const posts = getAllPosts()
 
-export default function Page() {
-  const [showLoginForm, setShowLoginForm] = useState(false);
-  const [windowHeight, setWindowHeight] = useState(0);
-  
-  // 监听窗口大小变化，更新高度
-  useEffect(() => {
-    // 初始化窗口高度
-    setWindowHeight(window.innerHeight);
-    
-    // 监听窗口大小变化
-    const handleResize = () => {
-      setWindowHeight(window.innerHeight);
-    };
-    
-    window.addEventListener('resize', handleResize);
-    
-    // 清理函数
-    return () => {
-      window.removeEventListener('resize', handleResize);
-    };
-  }, []);
-  
-  // 处理权限屏幕按钮点击
-  const handlePermissionAllow = () => {
-    setShowLoginForm(true);
-  };
-  
-  const handlePermissionDeny = () => {
-    // 在浏览器环境中退出网页
-    if (typeof window !== "undefined") {
-      window.close();
-      // 如果window.close()不起作用（现代浏览器限制），提供返回上一页的选项
-      window.history.back();
-    }
-  };
-  
   return (
-    <div 
-      className={`relative flex items-start justify-center w-full overflow-hidden ${
-        !showLoginForm ? 'bg-gray-100' : 'bg-gradient-to-b from-slate-800 to-slate-900'
-      }`}
-      style={{ height: windowHeight ? `${windowHeight}px` : '100vh' }}
-    >
-      
-      {/* 内容区域 */}
-      <div className="relative w-full max-w-md mx-auto px-4 pt-4">
-        {!showLoginForm ? (
-          <PermissionsScreen onAllow={handlePermissionAllow} onDeny={handlePermissionDeny} />
-        ) : (
-          <LoginForm />
-        )}
+    <main className="min-h-screen bg-gray-50">
+      {/* 头部 */}
+      <header className="bg-white shadow-sm">
+        <div className="max-w-4xl mx-auto px-4 py-8">
+          <h1 className="text-4xl font-bold text-gray-900 text-center">
+            我的博客
+          </h1>
+          <p className="text-gray-600 text-center mt-2">
+            分享技术心得与生活感悟
+          </p>
+        </div>
+      </header>
+
+      {/* 文章列表 */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <div className="space-y-8">
+          {posts.map((post) => (
+            <article key={post.id} className="bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-shadow">
+              <div className="flex flex-col space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-4 text-sm text-gray-500">
+                    <span>作者: {post.author}</span>
+                    <span>•</span>
+                    <span>{post.publishDate}</span>
+                  </div>
+                </div>
+                
+                <h2 className="text-2xl font-bold text-gray-900 hover:text-blue-600">
+                  <Link href={`/blog/${post.slug}`}>
+                    {post.title}
+                  </Link>
+                </h2>
+                
+                <p className="text-gray-600 leading-relaxed">
+                  {post.excerpt}
+                </p>
+                
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-wrap gap-2">
+                    {post.tags.map((tag) => (
+                      <span
+                        key={tag}
+                        className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                  
+                  <Link
+                    href={`/blog/${post.slug}`}
+                    className="text-blue-600 hover:text-blue-800 font-medium"
+                  >
+                    阅读更多 →
+                  </Link>
+                </div>
+              </div>
+            </article>
+          ))}
+        </div>
       </div>
-    </div>
+
+      {/* 页脚 */}
+      <footer className="bg-white border-t mt-16">
+        <div className="max-w-4xl mx-auto px-4 py-8 text-center text-gray-600">
+          <p>© 2024 我的博客. 使用 Next.js 构建</p>
+        </div>
+      </footer>
+    </main>
   )
 }

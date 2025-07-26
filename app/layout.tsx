@@ -1,63 +1,27 @@
-import type { Metadata, Viewport } from 'next'
-import { GeistSans } from 'geist/font/sans'
-import { GeistMono } from 'geist/font/mono'
-import { Toaster } from 'sonner'
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
 import './globals.css'
 
+const inter = Inter({ subsets: ['latin'] })
+
 export const metadata: Metadata = {
-  title: '王者荣耀',
-  description: 'Created with v0',
-  generator: 'v0.dev',
+  title: 'New Project',
+  description: 'A fresh start for a new project',
 }
 
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  minimumScale: 1,
-  userScalable: false,
-  viewportFit: 'cover',
-}
-
+/**
+ * 根布局组件
+ * @param children - 子组件
+ * @returns JSX元素
+ */
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode
-}>) {
+}) {
   return (
     <html lang="en">
-      <head>
-        <link rel="icon" href="data:," />
-        <style
-          dangerouslySetInnerHTML={{
-            __html: `
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-mono: ${GeistMono.variable};
-}
-
-@media (max-width: 768px) {
-  html {
-    font-size: 14px;
-  }
-}
-        `,
-          }}
-        />
-      </head>
-      <body className="overflow-hidden min-h-screen w-full">
-        {children}
-        <Toaster 
-          position="top-center"
-          toastOptions={{
-            style: {
-              marginTop: '50vh',
-              transform: 'translateY(-50%)',
-            },
-          }}
-        />
-      </body>
+      <body className={inter.className}>{children}</body>
     </html>
   )
 }
